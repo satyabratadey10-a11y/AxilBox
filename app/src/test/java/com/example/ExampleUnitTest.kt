@@ -1,8 +1,11 @@
 package com.example
 
+import com.example.data.DownloadState
 import com.example.data.Instance
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ExampleUnitTest {
@@ -27,17 +30,37 @@ class ExampleUnitTest {
     fun instance_custom_values() {
         val instance = Instance(
             id = 5,
-            name = "Debian 12",
+            name = "Alpine Linux",
             iconUri = "content://icon/5",
-            osImageUri = "content://file/debian.iso",
-            ramMb = 4096,
-            storageGb = 32
+            osImageUri = "content://file/alpine.iso",
+            ramMb = 512,
+            storageGb = 8
         )
         assertEquals(5, instance.id)
-        assertEquals("Debian 12", instance.name)
+        assertEquals("Alpine Linux", instance.name)
         assertEquals("content://icon/5", instance.iconUri)
-        assertEquals("content://file/debian.iso", instance.osImageUri)
-        assertEquals(4096, instance.ramMb)
-        assertEquals(32, instance.storageGb)
+        assertEquals("content://file/alpine.iso", instance.osImageUri)
+        assertEquals(512, instance.ramMb)
+        assertEquals(8, instance.storageGb)
+    }
+
+    @Test
+    fun guest_download_states() {
+        val progressState = DownloadState.Progress("Downloading Alpine minirootfs...", 45)
+        assertEquals(45, progressState.percentage)
+        assertEquals("Downloading Alpine minirootfs...", progressState.status)
+
+        val readyState = DownloadState.Ready("/data/kernel", "/data/rootfs.tar.gz")
+        assertEquals("/data/kernel", readyState.kernelPath)
+        assertEquals("/data/rootfs.tar.gz", readyState.rootfsPath)
+    }
+
+    @Test
+    fun serial_console_log_splitting() {
+        val sampleLog = "[    0.000000] Booting Linux on physical CPU 0x0\n[    0.000000] Linux version 6.6.71-0-virt\n"
+        val lines = sampleLog.split("\n").filter { it.isNotEmpty() }
+        assertEquals(2, lines.size)
+        assertTrue(lines[0].contains("Booting Linux"))
+        assertTrue(lines[1].contains("Linux version"))
     }
 }

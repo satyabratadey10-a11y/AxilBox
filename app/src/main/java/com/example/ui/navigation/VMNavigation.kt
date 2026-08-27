@@ -101,11 +101,12 @@ fun VMNavigation(
 
         composable(Destinations.ADD_INSTANCE) {
             AddInstanceScreen(
-                onSaveInstance = { name, iconUri, osImageUri, ramMb, storageGb ->
+                onSaveInstance = { name, iconUri, osImageUri, kernelUri, ramMb, storageGb ->
                     viewModel.addInstance(
                         name = name,
                         iconUri = iconUri,
                         osImageUri = osImageUri,
+                        kernelUri = kernelUri,
                         ramMb = ramMb,
                         storageGb = storageGb,
                         onSuccess = {

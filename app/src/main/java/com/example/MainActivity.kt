@@ -16,6 +16,18 @@ import com.example.ui.viewmodel.VMViewModel
 
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        init {
+            try {
+                System.loadLibrary("native_lib")
+            } catch (e: UnsatisfiedLinkError) {
+                // Graceful fallback if native library is unavailable
+            }
+        }
+    }
+
+    external fun stringFromJNI(): String
+
     private val viewModel: VMViewModel by viewModels {
         VMViewModel.Factory(application)
     }

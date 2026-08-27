@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,6 +41,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.NativeBridge
 import com.example.ui.theme.OutlineDark
 import com.example.ui.theme.PureBlack
 import com.example.ui.theme.PureWhite
@@ -98,10 +100,17 @@ fun DeveloperOptionsScreen(
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            val nativeStatus = remember { NativeBridge.getNativeStatus() }
+
+            DeveloperOptionItem(
+                icon = Icons.Outlined.Code,
+                title = "Native C/C++ Core (JNI)",
+                subtitle = nativeStatus
+            )
             DeveloperOptionItem(
                 icon = Icons.Outlined.Terminal,
                 title = "Virtualization Engine",
-                subtitle = "Phase 1 Shell (QEMU Core disabled)"
+                subtitle = "Phase 2 Stage 1 (QEMU aarch64 Serial virt Engine Active)"
             )
             DeveloperOptionItem(
                 icon = Icons.Outlined.Dns,

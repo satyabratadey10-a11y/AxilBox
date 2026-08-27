@@ -115,7 +115,7 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Outlined.Info,
                 title = "About VM Manager",
-                subtitle = "Version 1.0.0 (Phase 1 Shell)"
+                subtitle = "Version 1.1.0 (Alpine Linux aarch64 virt engine)"
             )
         }
     }

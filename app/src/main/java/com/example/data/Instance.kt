@@ -10,6 +10,7 @@ data class Instance(
     val name: String,
     val iconUri: String? = null,
     val osImageUri: String? = null,
+    val kernelUri: String? = null,
     val ramMb: Int = 2048,
     val storageGb: Int = 16
 )

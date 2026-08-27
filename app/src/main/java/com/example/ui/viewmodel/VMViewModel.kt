@@ -34,6 +34,7 @@ class VMViewModel(
         name: String,
         iconUri: String?,
         osImageUri: String?,
+        kernelUri: String?,
         ramMb: Int,
         storageGb: Int,
         onSuccess: () -> Unit
@@ -44,6 +45,7 @@ class VMViewModel(
                     name = name.trim(),
                     iconUri = iconUri,
                     osImageUri = osImageUri,
+                    kernelUri = kernelUri,
                     ramMb = ramMb,
                     storageGb = storageGb
                 )

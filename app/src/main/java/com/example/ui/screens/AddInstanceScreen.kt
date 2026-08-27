@@ -29,7 +29,7 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Memory
-import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -77,7 +77,7 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddInstanceScreen(
-    onSaveInstance: (name: String, iconUri: String?, osImageUri: String?, ramMb: Int, storageGb: Int) -> Unit,
+    onSaveInstance: (name: String, iconUri: String?, osImageUri: String?, kernelUri: String?, ramMb: Int, storageGb: Int) -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -86,6 +86,7 @@ fun AddInstanceScreen(
     var nameError by remember { mutableStateOf<String?>(null) }
     var selectedIconUri by remember { mutableStateOf<Uri?>(null) }
     var selectedOsImageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedKernelUri by remember { mutableStateOf<Uri?>(null) }
     var ramMbValue by remember { mutableFloatStateOf(2048f) }
     var storageGbValue by remember { mutableFloatStateOf(16f) }
 
@@ -102,6 +103,14 @@ fun AddInstanceScreen(
     ) { uri: Uri? ->
         if (uri != null) {
             selectedOsImageUri = uri
+        }
+    }
+
+    val kernelFilePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            selectedKernelUri = uri
         }
     }
 
@@ -258,7 +267,7 @@ fun AddInstanceScreen(
                     }
                 },
                 placeholder = {
-                    Text(text = "e.g. Alpine Linux, Android x86", color = TextTertiary)
+                    Text(text = "e.g. Alpine Linux, Debian aarch64", color = TextTertiary)
                 },
                 isError = nameError != null,
                 supportingText = {
@@ -284,11 +293,11 @@ fun AddInstanceScreen(
                     .testTag("instance_name_input")
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // OS Image File Picker Section
+            // RootFS / OS Image Picker Section
             Text(
-                text = "OS IMAGE REFERENCE",
+                text = "ROOTFS / INITRD IMAGE (OPTIONAL)",
                 color = TextSecondary,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -320,7 +329,7 @@ fun AddInstanceScreen(
                     ) {
                         Icon(
                             imageVector = if (selectedOsImageUri != null) Icons.Outlined.Description else Icons.Outlined.FolderOpen,
-                            contentDescription = "OS File",
+                            contentDescription = "OS RootFS File",
                             tint = PureWhite,
                             modifier = Modifier.size(24.dp)
                         )
@@ -332,18 +341,18 @@ fun AddInstanceScreen(
                         val fileName = if (selectedOsImageUri != null) {
                             UriUtils.getFileName(context, selectedOsImageUri)
                         } else {
-                            "Select OS Image File"
+                            "Select RootFS / Initrd (or leave blank for default Alpine)"
                         }
                         Text(
                             text = fileName,
                             color = PureWhite,
-                            fontSize = 15.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             maxLines = 1
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = if (selectedOsImageUri != null) "OS image linked" else "ISO, IMG, or BIN file",
+                            text = if (selectedOsImageUri != null) "RootFS linked" else "tar.gz, cpio, iso, or img format",
                             color = TextSecondary,
                             fontSize = 12.sp
                         )
@@ -357,6 +366,87 @@ fun AddInstanceScreen(
                             Icon(
                                 imageVector = Icons.Outlined.Close,
                                 contentDescription = "Clear OS Image",
+                                tint = TextSecondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Kernel Image Picker Section
+            Text(
+                text = "KERNEL IMAGE (OPTIONAL — REQUIRED FOR CUSTOM OS)",
+                color = TextSecondary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.5.sp
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+                border = BorderStroke(1.dp, OutlineDark),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { kernelFilePickerLauncher.launch("*/*") }
+                    .testTag("kernel_image_picker_button")
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(PureBlack)
+                    ) {
+                        Icon(
+                            imageVector = if (selectedKernelUri != null) Icons.Outlined.Description else Icons.Outlined.FolderOpen,
+                            contentDescription = "Kernel File",
+                            tint = PureWhite,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        val fileName = if (selectedKernelUri != null) {
+                            UriUtils.getFileName(context, selectedKernelUri)
+                        } else {
+                            "Select aarch64 Kernel Image (vmlinuz/Image)"
+                        }
+                        Text(
+                            text = fileName,
+                            color = PureWhite,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (selectedKernelUri != null) "Custom Kernel linked" else "Leave blank to use default bundled Alpine kernel",
+                            color = TextSecondary,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    if (selectedKernelUri != null) {
+                        IconButton(
+                            onClick = { selectedKernelUri = null },
+                            modifier = Modifier.testTag("clear_kernel_image_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Close,
+                                contentDescription = "Clear Kernel Image",
                                 tint = TextSecondary,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -414,7 +504,7 @@ fun AddInstanceScreen(
                         value = ramMbValue,
                         onValueChange = { ramMbValue = it },
                         valueRange = 512f..4096f,
-                        steps = 6, // 512, 1024, 1536, 2048, 2560, 3072, 3584, 4096
+                        steps = 6,
                         colors = SliderDefaults.colors(
                             thumbColor = PureWhite,
                             activeTrackColor = PureWhite,
@@ -519,6 +609,7 @@ fun AddInstanceScreen(
                         trimmedName,
                         selectedIconUri?.toString(),
                         selectedOsImageUri?.toString(),
+                        selectedKernelUri?.toString(),
                         ramMbValue.roundToInt(),
                         storageGbValue.roundToInt()
                     )
